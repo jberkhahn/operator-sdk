@@ -100,7 +100,7 @@ var _ = Describe("Generating a ClusterServiceVersion", func() {
 
 			BeforeEach(func() {
 				tmp, err = ioutil.TempDir(".", "")
-				ExpectWithOffset(1, err).ToNot(HaveOccurred())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			AfterEach(func() {
@@ -150,6 +150,22 @@ var _ = Describe("Generating a ClusterServiceVersion", func() {
 				}
 				Expect(g.Generate(cfg, opts...)).ToNot(HaveOccurred())
 				outputFile := filepath.Join(tmp, bundle.ManifestsDir, makeCSVFileName(operatorName))
+				Expect(outputFile).To(BeAnExistingFile())
+				Expect(string(readFileHelper(outputFile))).To(MatchYAML(newCSVStr))
+			})
+			It("should write a ClusterServiceVersion manifest to a package file", func() {
+				g = Generator{
+					OperatorName: operatorName,
+					OperatorType: operatorType,
+					Version:      version,
+					Collector:    col,
+				}
+				opts := []Option{
+					WithBase(csvBasesDir, goAPIsDir, projutil.InteractiveHardOff),
+					WithPackageWriter(tmp),
+				}
+				Expect(g.Generate(cfg, opts...)).ToNot(HaveOccurred())
+				outputFile := filepath.Join(tmp, g.Version, makeCSVFileName(operatorName))
 				Expect(outputFile).To(BeAnExistingFile())
 				Expect(string(readFileHelper(outputFile))).To(MatchYAML(newCSVStr))
 			})
