@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/operator-framework/operator-sdk/internal/generate"
 	kbutil "github.com/operator-framework/operator-sdk/internal/util/kubebuilder"
 )
 
@@ -39,6 +40,8 @@ type packagemanifestsCmd struct {
 	updateCRDs   bool
 	stdout       bool
 	quiet        bool
+	opts         generate.PkgOptions
+	generator    generate.PackageManifestGenerator
 
 	// Package manifest options.
 	channelName      string
@@ -54,6 +57,9 @@ func NewCmd() *cobra.Command {
 		Short:   "Generates package manifests data for the operator",
 		Long:    longHelp,
 		Example: examples,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 0 {
 				return fmt.Errorf("command %s doesn't accept any arguments", cmd.CommandPath())
@@ -68,6 +74,8 @@ func NewCmd() *cobra.Command {
 			if err = c.validate(); err != nil {
 				return fmt.Errorf("invalid command options: %v", err)
 			}
+			c.generator = generate.PkgGenerator{}
+
 			if err = c.run(cfg); err != nil {
 				log.Fatalf("Error generating package manifests: %v", err)
 			}

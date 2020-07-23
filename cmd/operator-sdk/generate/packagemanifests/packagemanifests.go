@@ -23,9 +23,9 @@ import (
 	"sigs.k8s.io/kubebuilder/pkg/model/config"
 
 	genutil "github.com/operator-framework/operator-sdk/cmd/operator-sdk/generate/internal"
+	"github.com/operator-framework/operator-sdk/internal/generate"
 	gencsv "github.com/operator-framework/operator-sdk/internal/generate/clusterserviceversion"
 	"github.com/operator-framework/operator-sdk/internal/generate/collector"
-	genpkg "github.com/operator-framework/operator-sdk/internal/generate/packagemanifest"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 )
 
@@ -96,7 +96,6 @@ func (c *packagemanifestsCmd) setDefaults(cfg *config.Config) {
 
 // validate validates c for package manifests generation.
 func (c packagemanifestsCmd) validate() error {
-
 	if c.version != "" {
 		if err := genutil.ValidateVersion(c.version); err != nil {
 			return err
@@ -140,7 +139,6 @@ func (c packagemanifestsCmd) validate() error {
 
 // run generates package manifests.
 func (c packagemanifestsCmd) run(cfg *config.Config) error {
-
 	if !c.quiet && !c.stdout {
 		fmt.Println("Generating package manifests version", c.version)
 	}
@@ -212,6 +210,7 @@ func (c packagemanifestsCmd) run(cfg *config.Config) error {
 }
 
 func (c packagemanifestsCmd) generatePackageManifest() error {
+	/**
 	pkgGen := genpkg.Generator{
 		OperatorName:     c.operatorName,
 		Version:          c.version,
@@ -222,7 +221,16 @@ func (c packagemanifestsCmd) generatePackageManifest() error {
 		genpkg.WithBase(c.inputDir),
 		genpkg.WithFileWriter(c.outputDir),
 	}
-	if err := pkgGen.Generate(opts...); err != nil {
+	**/
+	options := &generate.PkgOptions{
+		OperatorName:     c.operatorName,
+		Version:          c.version,
+		ChannelName:      c.channelName,
+		IsDefaultChannel: c.isDefaultChannel,
+		Base:             c.inputDir,
+		OutputDir:        c.outputDir,
+	}
+	if err := c.generator.Generate(options); err != nil {
 		return err
 	}
 	return nil
