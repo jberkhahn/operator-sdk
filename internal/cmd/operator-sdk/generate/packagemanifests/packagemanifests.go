@@ -23,9 +23,9 @@ import (
 	"sigs.k8s.io/kubebuilder/pkg/model/config"
 
 	genutil "github.com/operator-framework/operator-sdk/internal/cmd/operator-sdk/generate/internal"
+	genpkg "github.com/operator-framework/operator-sdk/internal/generate"
 	gencsv "github.com/operator-framework/operator-sdk/internal/generate/clusterserviceversion"
 	"github.com/operator-framework/operator-sdk/internal/generate/collector"
-	genpkg "github.com/operator-framework/operator-sdk/internal/generate/packagemanifest"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 )
 
@@ -92,6 +92,8 @@ func (c *packagemanifestsCmd) setDefaults(cfg *config.Config) (err error) {
 			c.outputDir = defaultRootDir
 		}
 	}
+
+	c.generator = genpkg.Generator{}
 	return nil
 }
 
@@ -210,17 +212,19 @@ func (c packagemanifestsCmd) run(cfg *config.Config) error {
 }
 
 func (c packagemanifestsCmd) generatePackageManifest() error {
-	pkgGen := genpkg.Generator{
-		OperatorName:     c.projectName,
-		Version:          c.version,
+	//copy of genpkg withfilewriter()
+	//move out of internal util pkg?
+	if err := os.MkdirAll(c.outputDir, 0755); err != nil {
+		return err
+	}
+
+	opts := &genpkg.PkgOptions{
+		BaseDir:          c.inputDir,
 		ChannelName:      c.channelName,
 		IsDefaultChannel: c.isDefaultChannel,
 	}
-	opts := []genpkg.Option{
-		genpkg.WithBase(c.inputDir),
-		genpkg.WithFileWriter(c.outputDir),
-	}
-	if err := pkgGen.Generate(opts...); err != nil {
+
+	if err := c.generator.GeneratePackageManifest(c.projectName, c.version, c.outputDir, opts); err != nil {
 		return err
 	}
 	return nil

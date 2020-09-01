@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/operator-framework/operator-sdk/internal/generate"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 )
 
@@ -43,6 +44,9 @@ type packagemanifestsCmd struct {
 	// Package manifest options.
 	channelName      string
 	isDefaultChannel bool
+
+	// Backend generator
+	generator generate.GeneratorSDK
 }
 
 // NewCmd returns the 'packagemanifests' command configured for the new project layout.
