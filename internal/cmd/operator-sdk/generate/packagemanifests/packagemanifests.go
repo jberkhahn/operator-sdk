@@ -22,10 +22,10 @@ import (
 
 	metricsannotations "github.com/operator-framework/operator-sdk/internal/annotations/metrics"
 	genutil "github.com/operator-framework/operator-sdk/internal/cmd/operator-sdk/generate/internal"
+	genpkg "github.com/operator-framework/operator-sdk/internal/generate"
 	gencsv "github.com/operator-framework/operator-sdk/internal/generate/clusterserviceversion"
 	"github.com/operator-framework/operator-sdk/internal/generate/clusterserviceversion/bases"
 	"github.com/operator-framework/operator-sdk/internal/generate/collector"
-	genpkg "github.com/operator-framework/operator-sdk/internal/generate/packagemanifest"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 )
 
@@ -103,6 +103,8 @@ func (c *packagemanifestsCmd) setDefaults() error {
 			c.outputDir = defaultRootDir
 		}
 	}
+
+	c.generator = genpkg.Generator{}
 	return nil
 }
 
@@ -228,17 +230,19 @@ func (c packagemanifestsCmd) run() error {
 }
 
 func (c packagemanifestsCmd) generatePackageManifest() error {
-	pkgGen := genpkg.Generator{
-		OperatorName:     c.packageName,
-		Version:          c.version,
+	//copy of genpkg withfilewriter()
+	//move out of internal util pkg?
+	if err := os.MkdirAll(c.outputDir, 0755); err != nil {
+		return err
+	}
+
+	opts := &genpkg.PkgOptions{
+		BaseDir:          c.inputDir,
 		ChannelName:      c.channelName,
 		IsDefaultChannel: c.isDefaultChannel,
 	}
-	opts := []genpkg.Option{
-		genpkg.WithBase(c.inputDir),
-		genpkg.WithFileWriter(c.outputDir),
-	}
-	if err := pkgGen.Generate(opts...); err != nil {
+
+	if err := c.generator.GeneratePackageManifest(c.packageName, c.version, c.outputDir, opts); err != nil {
 		return err
 	}
 	return nil

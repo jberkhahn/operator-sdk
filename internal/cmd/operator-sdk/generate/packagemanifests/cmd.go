@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/operator-framework/operator-sdk/internal/generate"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -44,6 +45,8 @@ type packagemanifestsCmd struct {
 	// These are set if a PROJECT config is not present.
 	layout      string
 	packageName string
+	// Backend generator
+	generator generate.GeneratorSDK
 }
 
 // NewCmd returns the 'packagemanifests' command configured for the new project layout.
