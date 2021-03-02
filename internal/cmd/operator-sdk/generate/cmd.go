@@ -29,6 +29,7 @@ func NewCmd() *cobra.Command {
 		Short: "Invokes a specific generator",
 		Long: `The 'operator-sdk generate' command invokes a specific generator to generate
 code or manifests.`,
+    Aliases: ["q"],
 	}
 
 	cmd.AddCommand(
